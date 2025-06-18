@@ -1,5 +1,6 @@
 build/
-
+.cache/
+.launch.json
 # Prerequisites
 *.d
 

@@ -9,6 +9,7 @@
 #define ZHONGQIANGREN_BASIC_SEARCH_DIJKSTRA_H_
 
 #include "search.hpp"
+#include <queue>
 #include <set>
 
 #define DEBUG_DIJKSTRA 0
@@ -24,6 +25,31 @@ namespace raplab{
 class Dijkstra : public GraphSearch
 {
 public:
+
+  struct Node {
+    long id;
+    double g = 0; // what's the meaning of this variable?
+    double h = 0; // waht's the meaning of this variable?
+
+
+    Node(int vid, double g = 0.0, double h = 0.0) {
+      this->id = vid;
+      this->g = g;
+      this->h = h;
+    }
+
+    inline double f() const { return g + h; }
+
+    // Define priority: which one should be expand earlier than others
+		// what if modify the priority?
+    inline bool operator<(const Node &rhs) const {
+      if (f() == rhs.f())
+        return g > rhs.g;
+      else
+        return f() > rhs.f();
+    }
+  };
+
 	/**
 	 *
 	 */
@@ -88,7 +114,7 @@ protected:
 	std::vector<long> _parent; // help reconstruct the path.
 	std::vector<double> _v2d; // store the results.
 	std::vector<std::vector<double>> _cvec; // the corresponding cost vector of the path to vd.
-	std::set< std::pair<double, long> > _open;
+	std::priority_queue<Node, std::vector<Node>, std::less<Node>> _open;
 	std::string _class_name = "Dijkstra";
 };
 

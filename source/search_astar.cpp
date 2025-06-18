@@ -23,9 +23,8 @@ double Astar::_heuristic(long v) {
 };
 
 void Astar::_add_open(long u, double dist_u) {
-  double f = dist_u + _wh*_heuristic(u);
-  auto temp_pair = std::make_pair(f,u);
-  _open.insert(temp_pair); // re-insert
+  double h =  _wh*_heuristic(u);
+  _open.push(Node(u, dist_u, h)); // re-insert
 };
 
 void Astar::SetHeuWeight(double w) {

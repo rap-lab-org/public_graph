@@ -134,7 +134,7 @@ int AstarSTGrid2d::_search() {
   _parent[s0.id] = -1; 
   _reached_goal_state_id = -1;
 
-  _open.insert( std::make_pair(_heuristic(s0.v), s0.id) );
+  _open.push( Node(s0.v, 0, _heuristic(s0.v)) );
 
   long n_exp = 0;
   long n_gen = 0;
@@ -149,14 +149,13 @@ int AstarSTGrid2d::_search() {
     }
 
     // ## select label l, lexicographic order ##
-    StateST& s = _states[ _open.begin()->second ];
+		auto cur = _open.top(); _open.pop();
+    StateST s = _states[ cur.id];
     double g_s = _g_all[s.ToStr()];
 
     if (DEBUG_ASTAR_ST > 0) {
-      std::cout << "[DEBUG] ### Pop state = " << s << " g=" << g_s << " h=" << _heuristic(s.v) << " f=" << _open.begin()->first << std::endl;
+      std::cout << "[DEBUG] ### Pop state = " << s << " g=" << g_s << " h=" << _heuristic(s.v) << " f=" << cur.f() << std::endl;
     }
-
-    _open.erase(_open.begin());
 
     if ( _check_terminate(s) ){
       _reached_goal_state_id = s.id;
@@ -214,8 +213,8 @@ int AstarSTGrid2d::_search() {
       }
 
       // cannot use Astar::_add_open() since there it is label ID rather than vertex ID.
-      auto f2 = g2 + _wh*_heuristic(s2.v);
-      _open.insert( std::make_pair(f2, s2.id) );
+      auto h2 = _wh*_heuristic(s2.v);
+      _open.push(Node(s2.v, g2, h2));
 
     } // end for
   } // end while

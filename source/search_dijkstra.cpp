@@ -72,12 +72,15 @@ int Dijkstra::_search() {
   // init search
   size_t nV = _graph->NumVertex();
   _v2d.clear();
-  _v2d.resize(nV, std::numeric_limits<double>::infinity() );
+  _v2d.resize(nV);
+	fill(_v2d.begin(), _v2d.end(), std::numeric_limits<double>::infinity());
   _parent.clear();
-  _parent.resize(nV, -1);
+  _parent.resize(nV);
+	fill(_parent.begin(), _parent.end(), -1);
   _cvec.clear();
   _cvec.resize(nV);
-  _open.insert(std::make_pair(0.0, _vs));
+	while (!_open.empty()) _open.pop();
+  _open.push(Node(_vs));
   _v2d[_vs] = 0.0;
   _cvec[_vs].resize(_graph->CostDim(), 0); // the corresponding cost vector of the path.
 
@@ -95,14 +98,13 @@ int Dijkstra::_search() {
     }
 
     // extract from OPEN
-    std::pair<double, long> curr_pair = *(_open.begin());
-    _open.erase(_open.begin());
-    auto v = curr_pair.second;
-    if (DEBUG_DIJKSTRA){ std::cout << "[DEBUG] Dijkstra::_search, - popped v = " << v << " g = " << curr_pair.first << std::endl; }
-    if (_class_name == "Dijkstra" && curr_pair.first > _v2d[v]) { // this candidate is outdated.
+		auto curr = _open.top(); _open.pop();
+    auto v = curr.id;
+    if (curr.g > _v2d[v]) { // this candidate is outdated.
     	// std::cout << "[INFO] Dijkstra::_search, outdated vertex exists" << std::endl;
     	continue;
     }
+    if (DEBUG_DIJKSTRA){ std::cout << "[DEBUG] Dijkstra::_search, - popped v = " << v << " g = " << curr.g << std::endl; }
 
     // check goal
     if (_mode == 0 && v == _vg) {
@@ -136,7 +138,7 @@ int Dijkstra::_search() {
         _v2d.clear();
         return -3; // failed
       } // end if
-      auto dist_u = curr_pair.first + c;
+      auto dist_u = curr.g + c;
       auto cvec_u = _cvec[v] + cvec; // the corresponding cost vector of the path to vd.
       if (DEBUG_DIJKSTRA){ std::cout << "[DEBUG] Dijkstra::_search, --- generate u = " << u << " g = " << dist_u << std::endl; }
 
@@ -156,8 +158,7 @@ int Dijkstra::_search() {
 };
 
 void Dijkstra::_add_open(long u, double dist_u) {
-  auto temp_pair = std::make_pair(dist_u,u);
-  _open.insert(temp_pair); // re-insert
+  _open.push(Node(u, dist_u)); // re-insert
 };
 
 void Dijkstra::_init_more() {
